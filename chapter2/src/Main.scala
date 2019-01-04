@@ -3,6 +3,34 @@ package chapter2
 import annotation._
 import scalaz.Memo
 
+sealed trait List[+A]
+case object Nil extends List[Nothing]
+case class Cons[+A](head: A, tail: List[A]) extends List[A]
+
+object List {
+  def sum(ints: List[Int]): Int = ints match {
+    case Nil => 0
+    case Cons(x, xs) => x + sum(xs)
+  }
+
+  def product(ds: List[Double]): Double = ds match {
+    case Nil => 1.0
+    case Cons(0.0, _) => 0.0
+    case Cons(x, xs) => x * product(xs)
+  }
+
+  def tail[A](as: List[A]): List[A] = as match {
+    case Cons(_, xs) => xs
+    case _ => Nil
+  }
+
+  def setHead[A](a: A, as: List[A]): List[A] = Cons(a, as)
+
+  def apply[A](as: A*): List[A] =
+    if (as.isEmpty) Nil
+    else Cons(as.head, apply(as.tail: _*))
+}
+
 object Main extends App {
   // expensive, and not tail recursive
   def fib(n: Int): Int = {
@@ -69,4 +97,20 @@ object Main extends App {
   val curriedSubtracter = curry(subtracter)
   val subtract1 = curriedSubtracter(1)
   println(compose(add2, subtract1)(5)) // 6
+
+  // exercise 3.1
+  val x = List(1, 2, 3, 4, 5) match {
+    case Cons(x, Cons(2, Cons(4, _))) => x
+    case Nil => 42
+    case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y // this is the matching case
+    case Cons(h, t) => h + List.sum(t)
+    case _ => 101
+  }
+  println(x)
+
+  // exercise 3.2
+  println(List.tail(List(1, 2, 3, 4)))
+
+  // exercise 3.3
+  println(List.setHead(1, List(2, 3, 4)))
 }
