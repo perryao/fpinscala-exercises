@@ -41,6 +41,18 @@ object List {
     case Cons(x, xs) => Cons(a, xs)
   }
 
+  def append[A](a1: List[A], a2: List[A]): List[A] = a1 match {
+    case Nil => a2
+    case Cons(h, t) => Cons(h, append(t, a2))
+  }
+
+  // returns all but the last element of a list
+  def init[A](l: List[A]): List[A] = l match {
+    case Nil => Nil
+    case Cons(_, Nil) => Nil
+    case Cons(h, t) => Cons(h, init(t)) 
+  }
+
   def apply[A](as: A*): List[A] =
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
@@ -134,4 +146,7 @@ object Main extends App {
 
   // exercise 3.5
   println(List.dropWhile[Int](List(1, 2, 3, 4), _ < 3))
+
+  // exercise 3.6
+  println(List.init(List(1, 2, 3, 4, 5)))
 }
