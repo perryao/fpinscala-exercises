@@ -19,6 +19,8 @@ object List {
     case Cons(x, xs) => x * product(xs)
   }
 
+  def product2(ns: List[Double]) = foldRight(ns, 1.0)(_ * _)
+
   def tail[A](as: List[A]): List[A] = as match {
     case Cons(_, xs) => xs
     case _ => Nil
@@ -51,6 +53,11 @@ object List {
     case Nil => Nil
     case Cons(_, Nil) => Nil
     case Cons(h, t) => Cons(h, init(t)) 
+  }
+
+  def foldRight[A, B](as: List[A], z: B)(f: (A, B) => B): B = as match {
+    case Nil => z
+    case Cons(x, xs) => f(x, foldRight(xs, z)(f))
   }
 
   def apply[A](as: A*): List[A] =
@@ -149,4 +156,8 @@ object Main extends App {
 
   // exercise 3.6
   println(List.init(List(1, 2, 3, 4, 5)))
+
+  // exercise 3.7 Can product2 short circuit if a 0 is anywhere in the list?
+  // The answer is it can't as implemented. It will always traverse the full list.
+  println(List.product2(List(1, 0, 3, 4)))
 }
