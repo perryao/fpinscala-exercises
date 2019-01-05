@@ -33,11 +33,8 @@ object List {
   }
 
   def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
-    case Nil => Nil
-    case Cons(h, t) => f(h) match {
-      case true => dropWhile(t, f)
-      case _ => Cons(h, t)
-    }
+    case Cons(h, t) if f(h) => dropWhile(t, f)
+    case _ => l
   }
 
   def setHead[A](a: A, as: List[A]): List[A] = as match {
