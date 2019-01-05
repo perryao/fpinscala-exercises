@@ -24,7 +24,25 @@ object List {
     case _ => Nil
   }
 
-  def setHead[A](a: A, as: List[A]): List[A] = Cons(a, as)
+  def drop[A](l: List[A], n: Int): List[A] = {
+    if (n <= 0) l
+    else l match {
+      case Nil => Nil
+      case Cons(_, xs) => drop(xs, n - 1)
+    }
+  }
+
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
+    case Nil => Nil
+    case Cons(h, t) => f(h) match {
+      case true => dropWhile(t, f)
+      case _ => Cons(h, t)
+    }
+  }
+
+  def setHead[A](a: A, as: List[A]): List[A] = as match {
+    case Cons(x, xs) => Cons(a, xs)
+  }
 
   def apply[A](as: A*): List[A] =
     if (as.isEmpty) Nil
@@ -113,4 +131,10 @@ object Main extends App {
 
   // exercise 3.3
   println(List.setHead(1, List(2, 3, 4)))
+
+  // exercise 3.4
+  println(List.drop(List(1,2,3,4), 2))
+
+  // exercise 3.5
+  println(List.dropWhile[Int](List(1, 2, 3, 4), _ < 3))
 }
