@@ -40,6 +40,7 @@ object List {
   }
 
   def setHead[A](a: A, as: List[A]): List[A] = as match {
+    // case Nil => Cons(a, Nil) // TODO: do this or throw error?
     case Cons(x, xs) => Cons(a, xs)
   }
 
@@ -59,6 +60,17 @@ object List {
     case Nil => z
     case Cons(x, xs) => f(x, foldRight(xs, z)(f))
   }
+
+  // originally implemented this using an internally defined loop function
+  // to get tail recursion. but used the reference repo to realize that the entire
+  // function itself could be defined as tail-recursive, not needing an inner function
+  @tailrec
+  def foldLeft[A, B](as: List[A], z: B)(f: (B, A) => B): B = as match {
+    case Nil => z
+    case Cons(h, t) => foldLeft(t, f(z, h))(f)
+  }
+
+  def length[A](as: List[A]): Int = foldRight(as, 0)((_, acc) => acc + 1)
 
   def apply[A](as: A*): List[A] =
     if (as.isEmpty) Nil
@@ -160,4 +172,19 @@ object Main extends App {
   // exercise 3.7 Can product2 short circuit if a 0 is anywhere in the list?
   // The answer is it can't as implemented. It will always traverse the full list.
   println(List.product2(List(1, 0, 3, 4)))
+
+  // exercise 3.8
+  // we just get back the original list
+  // Nil:List[Int] is just a type ascription (the book says type annotation but see: https://docs.scala-lang.org/style/types.html)
+  println(List.foldRight(List(1,2,3), Nil:List[Int])(Cons(_, _)))
+
+  // exercise 3.9
+  println(List.length(List(1,2,3)))
+
+  // exercise 3.10
+  // as implemented, foldRight isn't tail recursive so will StackOverflow on something like:
+  // println(List.foldRight(List((1 to 1000): _*), Nil:List[Int])(Cons(_, _)))
+  val foldLeftTest = List(1, 3, 5)
+  println(foldLeftTest)
+  println(List.foldLeft(foldLeftTest, 0)(_ + _)) // == 9
 }
