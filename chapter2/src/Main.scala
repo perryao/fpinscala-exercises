@@ -78,6 +78,8 @@ object List {
 
   def lengthByFold[A](as: List[A]): Int = foldLeft(as, 0)((acc, _) => acc + 1)
 
+  def reverse[A](ls: List[A]): List[A] = foldLeft(ls, List[A]())((acc, h) => Cons(h, acc))
+
   def apply[A](as: A*): List[A] =
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
@@ -200,4 +202,7 @@ object Main extends App {
   println(List.sumByFold(List(1,2,3))) // 6
   println(List.productByFold(List(1,2,3))) // 6
   println(List.lengthByFold(List(1,2,3))) // 3
+
+  // exercise 3.12
+  println(List.reverse(List(1,2,3))) // 3, 2, 1
 }
