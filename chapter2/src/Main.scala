@@ -13,11 +13,15 @@ object List {
     case Cons(x, xs) => x + sum(xs)
   }
 
+  def sumByFold(ints: List[Int]): Int = foldLeft(ints, 0)(_ + _)
+
   def product(ds: List[Double]): Double = ds match {
     case Nil => 1.0
     case Cons(0.0, _) => 0.0
     case Cons(x, xs) => x * product(xs)
   }
+
+  def productByFold(ds: List[Double]): Double = foldLeft(ds, 1.0)(_ * _)
 
   def product2(ns: List[Double]) = foldRight(ns, 1.0)(_ * _)
 
@@ -71,6 +75,8 @@ object List {
   }
 
   def length[A](as: List[A]): Int = foldRight(as, 0)((_, acc) => acc + 1)
+
+  def lengthByFold[A](as: List[A]): Int = foldLeft(as, 0)((acc, _) => acc + 1)
 
   def apply[A](as: A*): List[A] =
     if (as.isEmpty) Nil
@@ -187,4 +193,11 @@ object Main extends App {
   val foldLeftTest = List(1, 3, 5)
   println(foldLeftTest)
   println(List.foldLeft(foldLeftTest, 0)(_ + _)) // == 9
+
+
+  // exercise 3.11
+  // write sum, product and length using foldLeft
+  println(List.sumByFold(List(1,2,3))) // 6
+  println(List.productByFold(List(1,2,3))) // 6
+  println(List.lengthByFold(List(1,2,3))) // 3
 }
