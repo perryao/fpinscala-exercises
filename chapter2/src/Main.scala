@@ -53,6 +53,11 @@ object List {
     case Cons(h, t) => Cons(h, append(t, a2))
   }
 
+  // in terms of foldRight
+  def append2[A](a1: List[A], a2: List[A]): List[A] = foldRight2(a1, a2)(Cons(_, _))
+  // in terms of foldLeft
+  def append3[A](a1: List[A], a2: List[A]): List[A] = foldLeft(reverse(a1), a2)((b, a) => Cons(a, b))
+
   // returns all but the last element of a list
   def init[A](l: List[A]): List[A] = l match {
     case Nil => Nil
@@ -62,8 +67,14 @@ object List {
 
   def foldRight[A, B](as: List[A], z: B)(f: (A, B) => B): B = as match {
     case Nil => z
-    case Cons(x, xs) => f(x, foldRight(xs, z)(f))
+    case Cons(h, t) => f(h, foldRight(t, z)(f))
   }
+
+  // implemented in terms of foldLeft
+  def foldRight2[A, B](ls: List[A], z: B)(f: (A, B) => B): B = foldLeft(ls, (b:B) => b)((g,a) => b => g(f(a,b)))(z)
+    // TODO: this was my original implementation that seemed to work fine for addition
+    // Figure out what cases it's not good enough for
+    // foldLeft(ls, z)((b, a) => f(a, b))
 
   // originally implemented this using an internally defined loop function
   // to get tail recursion. but used the reference repo to realize that the entire
@@ -73,6 +84,10 @@ object List {
     case Nil => z
     case Cons(h, t) => foldLeft(t, f(z, h))(f)
   }
+
+  // implemented in terms of foldRight
+  // see: https://github.com/fpinscala/fpinscala/blob/master/answerkey/datastructures/13.answer.scala#L12
+  def foldLeft2[A, B](ls: List[A], z: B)(f: (B, A) => B) = foldRight(ls, (b: B) => b)((a, g) => b => g(f(b, a)))(z)
 
   def length[A](as: List[A]): Int = foldRight(as, 0)((_, acc) => acc + 1)
 
@@ -205,4 +220,12 @@ object Main extends App {
 
   // exercise 3.12
   println(List.reverse(List(1,2,3))) // 3, 2, 1
+
+  // exercise 3.13
+  println(List.foldRight2(List((1 to 1000): _*), 0)(_ - _)) //-500
+  println(List.foldLeft2(List((1 to 1000): _*), 0)(_ - _)) //-500500
+
+  // exercise 3.14
+  println(List.append2(List(1, 2, 3), List(4, 5, 6))) // 1, 2, 3, 4, 5, 6
+  println(List.append3(List(1, 2, 3), List(4, 5, 6))) // 1, 2, 3, 4, 5, 6
 }
