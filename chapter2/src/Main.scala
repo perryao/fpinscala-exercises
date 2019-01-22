@@ -5,7 +5,9 @@ import scalaz.Memo
 
 sealed trait List[+A]
 case object Nil extends List[Nothing]
-case class Cons[+A](head: A, tail: List[A]) extends List[A]
+case class Cons[+A](head: A, tail: List[A]) extends List[A] {
+  override def toString(): String = s"Cons($head,$tail)"
+}
 
 object List {
   def sum(ints: List[Int]): Int = ints match {
@@ -57,6 +59,8 @@ object List {
   def append2[A](a1: List[A], a2: List[A]): List[A] = foldRight2(a1, a2)(Cons(_, _))
   // in terms of foldLeft
   def append3[A](a1: List[A], a2: List[A]): List[A] = foldLeft(reverse(a1), a2)((b, a) => Cons(a, b))
+
+  def concat[A](l: List[List[A]]): List[A] = foldLeft(l, Nil:List[A])(append3)
 
   // returns all but the last element of a list
   def init[A](l: List[A]): List[A] = l match {
@@ -228,4 +232,11 @@ object Main extends App {
   // exercise 3.14
   println(List.append2(List(1, 2, 3), List(4, 5, 6))) // 1, 2, 3, 4, 5, 6
   println(List.append3(List(1, 2, 3), List(4, 5, 6))) // 1, 2, 3, 4, 5, 6
+
+  // exercise 3.15
+  val listOfLists = List(
+    List((1 to 10): _*),
+    List((10 to 15 ): _*)
+  )
+  println(List.concat(listOfLists)) // 1,2,3,4,5,6
 }
