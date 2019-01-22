@@ -111,6 +111,8 @@ object List {
 
   def reverse[A](ls: List[A]): List[A] = foldLeft(ls, List[A]())((acc, h) => Cons(h, acc))
 
+  def map[A, B](ls: List[A])(f: A => B): List[B] = foldRight2(ls, Nil:List[B])((a, b) => Cons(f(a), b))
+
   def apply[A](as: A*): List[A] =
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
@@ -258,4 +260,7 @@ object Main extends App {
   // exercise 3.17
   val strings: List[String] = List.toStrings(List(1.0, 2.0, 3.0))
   println(strings) // "1","2","3"
+
+  // exercise 3.18
+  println(List.map(List('A', 'B', 'C'))(_.toInt)) // 65, 66, 67
 }
