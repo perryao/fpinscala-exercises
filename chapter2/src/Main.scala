@@ -62,6 +62,18 @@ object List {
 
   def concat[A](l: List[List[A]]): List[A] = foldLeft(l, Nil:List[A])(append3)
 
+  // better would be using foldRight
+  def addOne(l: List[Int]): List[Int] = l match {
+    case Nil => Nil
+    case Cons(h, t) => Cons(h + 1, addOne(t))
+  }
+
+  // better would be using foldRight
+  def toStrings(l: List[Double]): List[String] = l match {
+    case Nil => Nil
+    case Cons(h, t) => Cons(h.toString, toStrings(t))
+  }
+
   // returns all but the last element of a list
   def init[A](l: List[A]): List[A] = l match {
     case Nil => Nil
@@ -239,4 +251,11 @@ object Main extends App {
     List((10 to 15 ): _*)
   )
   println(List.concat(listOfLists)) // 1,2,3,4,5,6
+
+  // exercise 3.16
+  println(List.addOne(List(1,2,3))) // 2,3,4
+
+  // exercise 3.17
+  val strings: List[String] = List.toStrings(List(1.0, 2.0, 3.0))
+  println(strings) // "1","2","3"
 }
