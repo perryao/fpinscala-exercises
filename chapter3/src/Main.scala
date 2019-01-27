@@ -116,6 +116,20 @@ object List {
 
   def filter[A](ls: List[A])(f: A => Boolean): List[A] = foldRight2(ls, Nil:List[A])((a, b) => if (f(a)) Cons(a, b) else b)
 
+  def filter2[A](ls: List[A])(f: A => Boolean): List[A] = flatMap(ls)(a => if (f(a)) List(a) else Nil)
+
+  def addPairs(a: List[Int], b: List[Int]): List[Int] = (a, b) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, addPairs(t1, t2)) 
+  }
+
+  def zipWith[A, B, C](a: List[A], b: List[B])(f: (A, B) => C): List[C] = (a, b) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
+  }
+
   def apply[A](as: A*): List[A] =
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
@@ -206,4 +220,13 @@ object Main extends App {
 
   // exercise 3.20
   println(List.flatMap(List(1,2,3))(i => List(i, i))) // 1,1,2,2,3,3
+
+  // exercise 3.21
+  println(List.filter(List(1,2,3))(_ % 2 == 0))
+
+  // exercise 3.22
+  println(List.addPairs(List(1,2,3), List(4,5,6))) // List(5,7,9)
+
+  // exercise 3.23
+  println(List.zipWith(List(1,2,3), List(4,5,6))(_ + _))
 }
