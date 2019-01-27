@@ -112,6 +112,8 @@ object List {
 
   def map[A, B](ls: List[A])(f: A => B): List[B] = foldRight2(ls, Nil:List[B])((a, b) => Cons(f(a), b))
 
+  def flatMap[A,B](ls: List[A])(f: A => List[B]): List[B] = concat(map(ls)(f))
+
   def filter[A](ls: List[A])(f: A => Boolean): List[A] = foldRight2(ls, Nil:List[A])((a, b) => if (f(a)) Cons(a, b) else b)
 
   def apply[A](as: A*): List[A] =
@@ -201,4 +203,7 @@ object Main extends App {
 
   // exericse 3.19
   println(List.filter(List(1,2,3))(_ % 2 == 0))
+
+  // exercise 3.20
+  println(List.flatMap(List(1,2,3))(i => List(i, i))) // 1,1,2,2,3,3
 }
