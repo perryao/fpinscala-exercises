@@ -112,6 +112,8 @@ object List {
 
   def map[A, B](ls: List[A])(f: A => B): List[B] = foldRight2(ls, Nil:List[B])((a, b) => Cons(f(a), b))
 
+  def filter[A](ls: List[A])(f: A => Boolean): List[A] = foldRight2(ls, Nil:List[A])((a, b) => if (f(a)) Cons(a, b) else b)
+
   def apply[A](as: A*): List[A] =
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
@@ -197,4 +199,6 @@ object Main extends App {
   // exercise 3.18
   println(List.map(List('A', 'B', 'C'))(_.toInt)) // 65, 66, 67
 
+  // exericse 3.19
+  println(List.filter(List(1,2,3))(_ % 2 == 0))
 }
