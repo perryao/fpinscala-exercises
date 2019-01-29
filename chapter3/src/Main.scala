@@ -8,6 +8,45 @@ case class Cons[+A](head: A, tail: List[A]) extends List[A] {
   override def toString(): String = s"Cons($head,$tail)"
 }
 
+sealed trait Tree[+A]
+case class Leaf[A](value: A) extends Tree[A]
+case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
+
+object Tree {
+  def size[A](t: Tree[A]): Int = t match {
+    case Leaf(_) => 1
+    case Branch(l, r) => 1 + size(l) + size(r)
+  }
+
+  def size2[A](t: Tree[A]): Int = fold(t)(_ => 1)(1 + _ + _)
+
+  def maximum(t: Tree[Int]): Int = t match {
+    case Leaf(v) => v
+    case Branch(l, r) => maximum(l) max maximum(r)
+  }
+
+  def maximum2(t: Tree[Int]): Int = fold(t)(a => a)(_ max _)
+
+  def depth[A](t: Tree[A]): Int = t match {
+    case Leaf(_) => 0
+    case Branch(l, r) => 1 + (depth(l) max depth(r))
+  }
+
+  def depth2[A](t: Tree[A]): Int = fold(t)(_ => 0)(1 + _ max _)
+
+  def map[A, B](t: Tree[A])(f: A => B): Tree[B] = t match {
+    case Leaf(v) => Leaf(f(v))
+    case Branch(l, r) => Branch(map(l)(f), map(r)(f))
+  }
+
+  def map2[A, B](t: Tree[A])(f: A=> B): Tree[B] = fold(t)(a => Leaf(f(a)): Tree[B])(Branch(_, _))
+
+  def fold[A, B](t: Tree[A])(f: A => B)(g: (B, B) => B): B = t match {
+    case Leaf(v) => f(v)
+    case Branch(l, r) => g(fold(l)(f)(g), fold(r)(f)(g))
+  }
+}
+
 object List {
   def sum(ints: List[Int]): Int = ints match {
     case Nil => 0
@@ -246,4 +285,28 @@ object Main extends App {
 
   // exercise 3.24
   println(List.hasSubsequence(List(1,2,3,4), List(1,2))) // true
+
+  // exercise 3.25
+  // TODO: perhaps implement an apply method on leaf
+  val tree: Tree[Int] = Branch(Leaf(1), Leaf(2))
+  println(Tree.size(tree)) // 3 (1 branch, 2 Leaves)
+  println(Tree.size2(tree)) // 3 (1 branch, 2 Leaves)
+
+  // exercise 3.26
+  println(Tree.maximum(tree)) // 2
+  println(Tree.maximum2(tree)) // 2
+
+  // exercise 3.27
+  println(Tree.depth(tree)) // 1
+  println(Tree.depth2(tree)) // 1
+
+  // exercise 3.28
+  println(Tree.map(tree)(_ * 2)) // 2, 4
+  println(Tree.map2(tree)(_ * 2)) // 2, 4
+
+  // exercise 3.29
+  println(Tree.fold[Int, Tree[Int]](tree)(Leaf(_))(Branch(_, _))) // get back the same Tree
+
+  // now let's concat every Leaf with newline in between
+  println(Tree.fold(tree)(_.toString)(_ + "\n" + _))
 }
