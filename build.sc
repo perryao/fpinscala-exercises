@@ -14,3 +14,7 @@ object chapter2 extends ScalaModule {
 object chapter3 extends ScalaModule {
   def scalaVersion = "2.12.4"
 }
+
+object chapter4 extends ScalaModule {
+  def scalaVersion = "2.12.4"
+}
