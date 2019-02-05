@@ -1,4 +1,5 @@
 package chapter4
+import util.Try
 
 sealed trait Option[+A] {
   def map[B](f: A => B): Option[B] = this match {
@@ -28,6 +29,13 @@ object Option {
     mean(xs) flatMap(m => mean(xs.map(x => math.pow(x - m, 2))))
 
   def map2[A,B,C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = a flatMap (aa => b.map(bb => f(aa, bb)))
+
+  def sequence[A](a: List[Option[A]]): Option[List[A]] = a.foldRight[Option[List[A]]](Some(Nil))((a, b) => map2(a, b)(_ :: _))
+
+  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] =
+    a.foldRight[Option[List[B]]](Some(Nil))((h, t) => map2(f(h), t)(_ :: _))
+
+  def sequenceViaTraverse[A](a: List[Option[A]]): Option[List[A]] = traverse(a)(x => x)
 }
 
 case class Some[+A](get: A) extends Option[A]
@@ -64,4 +72,13 @@ object Main extends App {
   // exercise 4.3
   println(Option.map2(Some(2), Some(2))(_ + _)) //4
   println(Option.map2(Some(2), None:Option[Int])(_ + _)) //None
+
+  // exercise 4.4
+  println(Option.sequence(List(Some(1), Some(2)))) // Some(List(1,2))
+
+  // exercise 4.5
+  println(Option.traverse[String, Int](List("1", "2", "3"))(a => Some(a.toInt))) // Some(List(1,2,3))
+  println(Option.traverse[String, Int](List("1", "2", "3"))(a => None)) // None
+
+  println(Option.sequenceViaTraverse(List(Some(1), Some(2)))) // Some(List(1,2))
 }
