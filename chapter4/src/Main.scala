@@ -41,6 +41,45 @@ object Option {
 case class Some[+A](get: A) extends Option[A]
 case object None extends Option[Nothing]
 
+sealed trait Either[+E, +A] {
+  def map[B](f: A => B): Either[E, B] = this match {
+    case Left(e) => Left(e)
+    case Right(a) => Right(f(a))
+  }
+  // Should we implement getOrElse like in Option?
+  def flatMap[EE >: E, B](f: A => Either[EE, B]): Either[EE, B] = this match {
+    case Left(e) => Left(e)
+    case Right(a) => f(a)
+  }
+  def orElse[EE >: E, B >: A](b: => Either[EE, B]): Either[EE, B] = this match {
+    case Left(_) => b
+    case Right(a) => Right(a)
+  }
+  def map2[EE >: E, B, C](b: Either[EE, B])(f: (A, B) => C): Either[EE, C] = for {
+    a <- this
+    b1 <- b
+  } yield f(a, b1)
+}
+
+case class Left[+E](value: E) extends Either[E, Nothing]
+case class Right[+A](value: A) extends Either[Nothing, A]
+
+object Either {
+  def mean(xs: IndexedSeq[Double]): Either[String, Double] =
+    if (xs.isEmpty)
+      Left("mean of empty list!")
+    else
+      Right(xs.sum / xs.length)
+
+  def saveDiv(x: Int, y: Int): Either[Exception, Int] =
+    try Right(x / y)
+    catch { case e: Exception => Left(e) }
+
+  def Try[A](a: => A): Either[Exception, A] =
+    try Right(a)
+    catch { case e: Exception => Left(e) }
+}
+
 object Main extends App {
   // exercise 4.1
   val some = Some("value")
@@ -81,4 +120,28 @@ object Main extends App {
   println(Option.traverse[String, Int](List("1", "2", "3"))(a => None)) // None
 
   println(Option.sequenceViaTraverse(List(Some(1), Some(2)))) // Some(List(1,2))
+
+  // exercise 4.6
+  val l: Either[String, Int] = Left("This is an error")
+  val r: Either[String, Int] = Right(2)
+
+  // map
+  println(l.map(_ + 2)) // Left("This is an error")
+  println(r.map(_ + 2)) // Right(4)
+
+  // flatMap
+  // return original Either, a Left
+  println(l.flatMap(Left(_))) // Left("This is an error")
+  // convert Left to Right
+  println(l.flatMap(_ => Right(5))) // Right(5)
+  // convert a Right to a Left
+  println(r.flatMap(a => Left(s"didn't want $a"))) // Left("didn't want 2")
+
+  // orElse
+  println(l.orElse(Left("some error"))) // Left("some error")
+  println(r.orElse(Left("some error"))) // Right(2)
+
+  //map2
+  println(l.map2(Right(6))(_ + _)) // Left("this is an error")
+  println(r.map2(Right(6))(_ + _)) // 8
 }
