@@ -78,6 +78,13 @@ object Either {
   def Try[A](a: => A): Either[Exception, A] =
     try Right(a)
     catch { case e: Exception => Left(e) }
+
+  def sequence[E,A](es: List[Either[E, A]]): Either[E, List[A]] = es.foldRight[Either[E, List[A]]](Right(Nil))((a, b) => a.map2(b)(_ :: _))
+
+  def sequenceViaTraverse[E, A](es: List[Either[E, A]]): Either[E, List[A]] = traverse(es)(x => x)
+
+  def traverse[E, A, B](as: List[A])(f: A => Either[E, B]): Either[E, List[B]] =
+    as.foldRight[Either[E, List[B]]](Right(Nil))((h, t) => f(h).map2(t)(_ :: _))
 }
 
 object Main extends App {
@@ -144,4 +151,13 @@ object Main extends App {
   //map2
   println(l.map2(Right(6))(_ + _)) // Left("this is an error")
   println(r.map2(Right(6))(_ + _)) // 8
+
+  // exercise 4.7
+  println(Either.sequence(List(Right(1), Right(2), Right(3)))) // Right(List(1,2,3))
+  println(Either.sequenceViaTraverse(List(Right(1), Right(2), Right(3)))) // Right(List(1,2,3))
+  println(Either.sequence(List(Right(1), Left("this is an error"), Right(3)))) // Left("this is an error")
+  println(Either.sequenceViaTraverse(List(Right(1), Left("this is an error"), Right(3)))) // Left("this is an error")
+
+  println(Either.traverse[String, Int, Int](List(1,2,3,4,5))(x => if (x < 6) Right(x) else Left("too low"))) // Right(List(1,2,3,4,5))
+  println(Either.traverse[String, Int, Int](List(1,2,3,4,5))(x => if (x > 2) Right(x) else Left(s"$x is too low"))) // Left("1 is too low") 
 }
