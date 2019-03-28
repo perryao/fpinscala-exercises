@@ -56,6 +56,21 @@ sealed trait Stream[+A] {
   // more clear than the above
   def forAllByFoldRight(p: A => Boolean): Boolean =
     foldRight(true)((a, b) => p(a) && b)
+
+  def map[B](f: A => B): Stream[B] =
+    foldRight(empty[B])((a, b) => cons(f(a), b))
+
+  def filter(f: A => Boolean): Stream[A] =
+    foldRight(empty[A])((a, b) => if (f(a)) cons(a, b) else b)
+
+  def find(f: A => Boolean): Option[A] =
+    filter(f).headOption
+
+  def append[B>:A](a: => Stream[B]): Stream[B] =
+    foldRight(a)((a, b) => cons(a, b))
+
+  def flatMap[B](f: A => Stream[B]): Stream[B] =
+    foldRight(empty[B])((a, b) => f(a) append b)
 }
 
 case object Empty extends Stream[Nothing]
@@ -67,6 +82,13 @@ object Stream {
     lazy val tail = tl
     Cons(() => head, () => tail)
   }
+
+  // see https://github.com/fpinscala/fpinscala/blob/master/answerkey/laziness/08.answer.scala
+  // for a more efficient version using a lazy val
+  def constant[A](a: A): Stream[A] = cons(a, constant(a))
+
+  def from(n: Int): Stream[Int] = cons(n, from(n + 1))
+
   def empty[A]: Stream[A] = Empty
 
   def apply[A](as: A*): Stream[A] =
@@ -96,4 +118,17 @@ object Main extends App {
   // exercise 5.6
   println(Stream(1,2,3).headOptionByFoldRight) // Some(1)
   println(Stream().headOptionByFoldRight) // None
+
+  // exercise 5.7
+  println(Stream(1,2,3).map(_ + 1).toList) // List(2,3,4)
+  println(Stream(1,2,3).filter(_ < 3).toList) // List(1,2)
+  println(Stream(1,2,3).append(Stream(3,4,5)).toList) // List(1,2,3,4,5)
+  println(Stream(1, 2, 3).flatMap(x => Stream(x, x + 1)).toList) // List(1,2,2,3,3,4)
+  println(Stream(1,2,3,4).map(_ + 10).filter(_ % 2 ==0).toList)
+
+  // exercise 5.8
+  println(Stream.constant(5).take(3).toList) // List(5,5,5)
+
+  // exercise 5.9
+  println(Stream.from(5).take(3).toList) // List(5,6,7)
 }
