@@ -89,6 +89,16 @@ object Stream {
 
   def from(n: Int): Stream[Int] = cons(n, from(n + 1))
 
+  def fibs(): Stream[Int] = {
+    def gen(prev: Int, cur: Int): Stream[Int] = cons(prev, gen(cur, prev + cur))
+    gen(0, 1)
+  }
+
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = f(z) match {
+    case None => empty
+    case Some((a, s)) => cons(a, unfold(s)(f)) 
+  }
+
   def empty[A]: Stream[A] = Empty
 
   def apply[A](as: A*): Stream[A] =
@@ -131,4 +141,10 @@ object Main extends App {
 
   // exercise 5.9
   println(Stream.from(5).take(3).toList) // List(5,6,7)
+
+  // exercise 5.10
+  println(Stream.fibs().take(7).toList) // List(0,1,1,2,3,5,8
+
+  // exercise 5.11
+  println(Stream.unfold(0)(x => Some(x, x + 1)).take(3).toList) // List(0,1,2)
 }
