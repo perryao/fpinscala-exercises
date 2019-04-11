@@ -87,12 +87,20 @@ object Stream {
   // for a more efficient version using a lazy val
   def constant[A](a: A): Stream[A] = cons(a, constant(a))
 
+  def constantByUnfold[A](a: A): Stream[A] = unfold(a)(_ => Some(a, a))
+
+  def onesByUnfold(): Stream[Int] = unfold(1)(_ => Some(1, 1))
+
   def from(n: Int): Stream[Int] = cons(n, from(n + 1))
+  def fromByUnfold(n: Int): Stream[Int] = unfold(n)(n => Some(n, n + 1))
 
   def fibs(): Stream[Int] = {
     def gen(prev: Int, cur: Int): Stream[Int] = cons(prev, gen(cur, prev + cur))
     gen(0, 1)
   }
+
+  // read more on Pattern Matching anonymous functions here: https://www.scala-lang.org/files/archive/spec/2.12/08-pattern-matching.html#pattern-matching-anonymous-functions
+  def fibsByUnfold(): Stream[Int] = unfold((0,1)) {case (f0, f1) => Some(f0, (f1, f0 + f1))}
 
   def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = f(z) match {
     case None => empty
@@ -147,4 +155,10 @@ object Main extends App {
 
   // exercise 5.11
   println(Stream.unfold(0)(x => Some(x, x + 1)).take(3).toList) // List(0,1,2)
+
+  // exercise 5.12
+  println(Stream.fibsByUnfold().take(7).toList) // List(0,1,1,2,3,5,8
+  println(Stream.fromByUnfold(5).take(3).toList) // List(5,6,7)
+  println(Stream.constantByUnfold(5).take(3).toList) // List(5,5,5)
+  println(Stream.onesByUnfold().take(3).toList) // List(1,1,1)
 }
