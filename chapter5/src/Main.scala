@@ -154,6 +154,8 @@ object Main extends App {
   println(Stream.fibs().take(7).toList) // List(0,1,1,2,3,5,8
 
   // exercise 5.11
+  // TODO: determine the feature of scala that implicitly converts Some(x, x + 1) to Some((x, x + 1))
+  // e.g. to a tuple
   println(Stream.unfold(0)(x => Some(x, x + 1)).take(3).toList) // List(0,1,2)
 
   // exercise 5.12
