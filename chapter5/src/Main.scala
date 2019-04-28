@@ -23,6 +23,13 @@ sealed trait Stream[+A] {
     case _                    => empty
   }
 
+  def takeByUnfold(n: Int): Stream[A] =
+    unfold((this, n)) {
+      case (Cons(h, t), 1) => Some((h(), (empty, 0)))
+      case (Cons(h, t), n) if n > 1 => Some((h(), (t(), n - 1)))
+      case _ => None
+    }
+
   @annotation.tailrec
   final def drop(n: Int): Stream[A] = this match {
     case Cons(_, t) if n > 0 => t().drop(n - 1)
@@ -33,6 +40,12 @@ sealed trait Stream[+A] {
     case Cons(h, t) if p(h()) => cons(h(), t().takeWhile(p))
     case _                    => empty
   }
+
+  def takeWhileByUnfold(p: A => Boolean): Stream[A] =
+    unfold(this) {
+      case Cons(h, t) if p(h()) => Some((h(), t()))
+      case _ => None
+    }
 
   def takeWhileByFoldRight(p: A => Boolean): Stream[A] =
     foldRight(empty[A])((h, t) => if (p(h)) cons(h, t) else empty)
@@ -60,6 +73,12 @@ sealed trait Stream[+A] {
   def map[B](f: A => B): Stream[B] =
     foldRight(empty[B])((a, b) => cons(f(a), b))
 
+  def mapByUnfold[B](f: A => B): Stream[B] =
+    unfold(this){ 
+      case Cons(h, t) => Some((f(h()), t())) 
+      case _ => None
+    }
+
   def filter(f: A => Boolean): Stream[A] =
     foldRight(empty[A])((a, b) => if (f(a)) cons(a, b) else b)
 
@@ -71,6 +90,33 @@ sealed trait Stream[+A] {
 
   def flatMap[B](f: A => Stream[B]): Stream[B] =
     foldRight(empty[B])((a, b) => f(a) append b)
+
+  def zipWith[B, C](b: Stream[B])(f: (A, B) => C): Stream[C] =
+    unfold((this, b)) {
+      case (Cons(h1, t1), Cons(h2, t2)) => Some((f(h1(), h2()), (t1(), t2())))
+      case _ => None
+    }
+
+  def zipAll[B](s2: Stream[B]): Stream[(Option[A], Option[B])] =
+    unfold((this, s2)) {
+      case (Empty, Empty) => None
+      case (Cons(h, t), Empty) => Some((Some(h()), None), (t(), empty))
+      case (Empty, Cons(h, t)) => Some((None, Some(h())), (empty, t()))
+      case (Cons(h1, t1), Cons(h2, t2)) => Some((Some(h1()), Some(h2())), (t1(), t2()))
+      case _ => None
+    }
+
+  def startsWith[A](s: Stream[A]): Boolean =
+    this.zipAll(s).takeWhile(!_._2.isEmpty).forAll { case (h1, h2) => h1 == h2 }
+
+  def tails: Stream[Stream[A]] =
+    unfold(this) {
+      case Empty => None
+      case s => Some((s, s drop 1))
+    } append(Stream(empty))
+
+  def hasSubsequence[A](s: Stream[A]): Boolean =
+    tails exists (_ startsWith s)
 }
 
 case object Empty extends Stream[Nothing]
@@ -151,7 +197,7 @@ object Main extends App {
   println(Stream.from(5).take(3).toList) // List(5,6,7)
 
   // exercise 5.10
-  println(Stream.fibs().take(7).toList) // List(0,1,1,2,3,5,8
+  println(Stream.fibs().take(7).toList) // List(0,1,1,2,3,5,8)
 
   // exercise 5.11
   // TODO: determine the feature of scala that implicitly converts Some(x, x + 1) to Some((x, x + 1))
@@ -163,4 +209,21 @@ object Main extends App {
   println(Stream.fromByUnfold(5).take(3).toList) // List(5,6,7)
   println(Stream.constantByUnfold(5).take(3).toList) // List(5,5,5)
   println(Stream.onesByUnfold().take(3).toList) // List(1,1,1)
+
+  // exercise 5.13
+  println(Stream(1,2,3).mapByUnfold(_ + 1).toList) // List(2,3,4)
+  println(Stream.fibs().takeByUnfold(7).toList) // List(0,1,1,2,3,5,8)
+  println(Stream(1, 2, 3).takeWhileByUnfold(_ < 3).toList) // List(1,2)
+  println(Stream(1,2,3).zipWith(Stream(4,5,6))(_ + _).toList) // List(5,7,9)
+  println(Stream(1,2,3).zipAll(Stream(4,5)).toList) // List((Some(1), Some(4)), (Some(2), Some(5)), (Some(3), None))
+  println(Stream(1,2).zipAll(Stream(4,5,6)).toList) // List((Some(1), Some(4)), (Some(2), Some(5)), (None, Some(6)))
+
+  // exercise 5.14
+  println(Stream(1,2).startsWith(Stream(1))) // true
+
+  // exercise 5.15
+  println(Stream(1,2).tails.map(_.toList).toList) // List(List(1,2), List(2), List())
+
+  // hasSubsequence
+  println(Stream(1,2,3,4,5,6).hasSubsequence(Stream(2,3))) // true
 }
