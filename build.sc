@@ -3,6 +3,10 @@ import mill._, scalalib._, scalafmt._
 
 trait BaseModule extends ScalaModule with ScalafmtModule {
   def scalaVersion = "2.12.8"
+  object test extends Tests { 
+    def ivyDeps = Agg(ivy"org.scalatest::scalatest:3.0.5")
+    def testFrameworks = Seq("org.scalatest.tools.Framework")
+  }
 }
 
 object cafes extends BaseModule {}
@@ -18,3 +22,5 @@ object chapter3 extends BaseModule {}
 object chapter4 extends BaseModule {}
 
 object chapter5 extends BaseModule {}
+
+object chapter6 extends BaseModule {}
