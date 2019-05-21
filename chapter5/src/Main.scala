@@ -115,6 +115,17 @@ sealed trait Stream[+A] {
       case s => Some((s, s drop 1))
     } append(Stream(empty))
 
+  // see: https://github.com/fpinscala/fpinscala/blob/master/answerkey/laziness/16.answer.scala
+  def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] =
+    foldRight((z, Stream(z)))((a, p0) => {
+      // p0 is passed by-name and used in by-name args in f and cons. 
+      // So use lazy val to ensure only one evaluation...
+      lazy val p1 = p0
+      println((a, p1._1, p1._2.toList))
+      val b2 = f(a, p1._1)
+      (b2, cons(b2, p1._2))
+    })._2
+
   def hasSubsequence[A](s: Stream[A]): Boolean =
     tails exists (_ startsWith s)
 }
@@ -226,4 +237,7 @@ object Main extends App {
 
   // hasSubsequence
   println(Stream(1,2,3,4,5,6).hasSubsequence(Stream(2,3))) // true
+
+  // exercise 5.16
+  println(Stream(1,2,3).scanRight(0)(_ + _).toList) // List(6,5,3,0)
 }
