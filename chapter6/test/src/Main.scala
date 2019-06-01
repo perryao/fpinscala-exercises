@@ -10,31 +10,25 @@ class MainSpec extends FlatSpec with Matchers with TableDrivenPropertyChecks {
     assert(n1 == 16159453)
   }
 
-  it should "return a positive value" in {
+  it should "return a value between 0 and Int.MaxInt" in {
     import SimpleRNG._ 
-    val seeds = Table(
-      ("n"),
-      -1,
-      0,
-      1,
-      Int.MinValue,
-      Int.MaxValue,
-      42,
-      10000,
+    val minValueRNG = new RNG {
+      def nextInt: (Int, RNG) = (Int.MinValue, SimpleRNG(0))
+    }
+    val rngs = Table(
+      ("rng"),
+      SimpleRNG(-1),
+      SimpleRNG(0),
+      SimpleRNG(1),
+      SimpleRNG(Int.MinValue),
+      SimpleRNG(Int.MaxValue),
+      SimpleRNG(42),
+      SimpleRNG(10000),
+      minValueRNG
     )
-    forAll(seeds) { (n: Int) =>
-      val rng = SimpleRNG(n)
+    forAll(rngs) { (rng: RNG) =>
       val (n1, rng2) = nonNegativeInt(rng)
       assert((0 to Int.MaxValue) contains n1)
     }
-  }
-
-  it should "return positive when nextInt returns Int.MinValue" in {
-    import SimpleRNG._ 
-    val rng = new RNG {
-      def nextInt: (Int, RNG) = (Int.MinValue, SimpleRNG(0))
-    }
-    val (n1, rng2) = nonNegativeInt(rng)
-    assert((0 to Int.MaxValue) contains n1)
   }
 }
