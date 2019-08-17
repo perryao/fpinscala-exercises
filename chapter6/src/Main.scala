@@ -51,4 +51,31 @@ object SimpleRNG {
     val (d3, r3) = double(r2)
     ((d1, d2, d3), r3)
   }
+
+  // tail-recursive solution from https://github.com/fpinscala/fpinscala/blob/master/answerkey/state/04.answer.scala
+  def ints(count: Int)(rng: RNG): (List[Int], RNG) = {
+    def go(count: Int, r: RNG, xs: List[Int]): (List[Int], RNG) = {
+      if (count <= 0) (xs, r)
+      else {
+        val (x, r2) = r.nextInt
+        go(count - 1, r2, x :: xs)
+      }
+    }
+
+    go(count, rng, List())
+  }
+
+  // my solution using foldleft
+  def ints2(count: Int)(rng: RNG): (List[Int], RNG) = {
+    if (count <= 0) (List(), rng)
+    else {
+      val (i, r) = rng.nextInt
+      val z      = (List(i), r)
+      (0 until count).foldLeft(z)({
+        case ((xs, r), _) =>
+          val (x, r1) = r.nextInt
+          (x :: xs, r1)
+      })
+    }
+  }
 }

@@ -63,4 +63,19 @@ class MainSpec extends FlatSpec with Matchers with TableDrivenPropertyChecks {
       println(n1, n2, n3)
     }
   }
+
+  "ints" should "return an empty list for count 0" in new SimpleRNGFixtures {
+    forAll(rngs) { rng =>
+      val (randomInts, _) = ints2(0)(rng)
+      println(randomInts)
+      assert(randomInts.length == 0)
+    }
+  }
+
+  "ints" should "generate a list of ints" in new SimpleRNGFixtures {
+    forAll(rngs) { rng =>
+      val (randomInts, _) = ints2(5)(rng)
+      println(randomInts)
+    }
+  }
 }
