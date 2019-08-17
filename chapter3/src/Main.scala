@@ -13,6 +13,7 @@ case class Leaf[A](value: A)                        extends Tree[A]
 case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
 
 object Tree {
+
   def size[A](t: Tree[A]): Int = t match {
     case Leaf(_)      => 1
     case Branch(l, r) => 1 + size(l) + size(r)
@@ -48,6 +49,7 @@ object Tree {
 }
 
 object List {
+
   def sum(ints: List[Int]): Int = ints match {
     case Nil         => 0
     case Cons(x, xs) => x + sum(xs)
@@ -96,6 +98,7 @@ object List {
 
   // in terms of foldRight
   def append2[A](a1: List[A], a2: List[A]): List[A] = foldRight2(a1, a2)(Cons(_, _))
+
   // in terms of foldLeft
   def append3[A](a1: List[A], a2: List[A]): List[A] =
     foldLeft(reverse(a1), a2)((b, a) => Cons(a, b))
@@ -196,6 +199,7 @@ object List {
 }
 
 object Main extends App {
+
   // exercise 3.1
   val x = List(1, 2, 3, 4, 5) match {
     case Cons(x, Cons(2, Cons(4, _)))          => x

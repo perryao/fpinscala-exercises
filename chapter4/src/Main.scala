@@ -2,6 +2,7 @@ package chapter4
 import util.Try
 
 sealed trait Option[+A] {
+
   def map[B](f: A => B): Option[B] = this match {
     case None    => None
     case Some(a) => Some(f(a))
@@ -21,6 +22,7 @@ sealed trait Option[+A] {
 }
 
 object Option {
+
   def mean(xs: Seq[Double]): Option[Double] =
     if (xs.isEmpty) None
     else Some(xs.sum / xs.length)
@@ -44,19 +46,23 @@ case class Some[+A](get: A) extends Option[A]
 case object None            extends Option[Nothing]
 
 sealed trait Either[+E, +A] {
+
   def map[B](f: A => B): Either[E, B] = this match {
     case Left(e)  => Left(e)
     case Right(a) => Right(f(a))
   }
+
   // Should we implement getOrElse like in Option?
   def flatMap[EE >: E, B](f: A => Either[EE, B]): Either[EE, B] = this match {
     case Left(e)  => Left(e)
     case Right(a) => f(a)
   }
+
   def orElse[EE >: E, B >: A](b: => Either[EE, B]): Either[EE, B] = this match {
     case Left(_)  => b
     case Right(a) => Right(a)
   }
+
   def map2[EE >: E, B, C](b: Either[EE, B])(f: (A, B) => C): Either[EE, C] =
     for {
       a  <- this
@@ -68,6 +74,7 @@ case class Left[+E](value: E)  extends Either[E, Nothing]
 case class Right[+A](value: A) extends Either[Nothing, A]
 
 object Either {
+
   def mean(xs: IndexedSeq[Double]): Either[String, Double] =
     if (xs.isEmpty)
       Left("mean of empty list!")

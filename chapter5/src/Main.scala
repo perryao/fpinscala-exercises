@@ -2,6 +2,7 @@ package chapter5
 
 sealed trait Stream[+A] {
   import Stream._
+
   def headOption: Option[A] = this match {
     case Empty      => None
     case Cons(h, t) => Some(h())
@@ -65,6 +66,7 @@ sealed trait Stream[+A] {
     }
 
   def forAll(p: A => Boolean): Boolean = !exists(a => !p(a))
+
   // The book is looking for this, which uses foldRight. Probably
   // more clear than the above
   def forAllByFoldRight(p: A => Boolean): Boolean =
@@ -134,6 +136,7 @@ case object Empty                                   extends Stream[Nothing]
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
 
 object Stream {
+
   def cons[A](hd: => A, tl: => Stream[A]): Stream[A] = {
     lazy val head = hd
     lazy val tail = tl

@@ -5,12 +5,14 @@ case class Coffee(price: Double = 5)
 case class CreditCard(owner: String)
 
 object CreditCard {
+
   def charge(cc: CreditCard, amount: Double) = {
     println(s"charged ${cc.owner} $$$amount")
   }
 }
 
 case class Charge(cc: CreditCard, amount: Double) {
+
   def combine(other: Charge): Charge =
     if (cc == other.cc)
       Charge(cc, amount + other.amount)
@@ -19,6 +21,7 @@ case class Charge(cc: CreditCard, amount: Double) {
 }
 
 class Cafe {
+
   def buyCoffee(cc: CreditCard): (Coffee, Charge) = {
     val cup = new Coffee()
     (cup, Charge(cc, cup.price))

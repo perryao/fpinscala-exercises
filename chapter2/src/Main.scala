@@ -4,6 +4,7 @@ import annotation._
 import scalaz.Memo
 
 object Main extends App {
+
   // expensive, and not tail recursive
   def fib(n: Int): Int = {
     def go(n: Int): Int =
