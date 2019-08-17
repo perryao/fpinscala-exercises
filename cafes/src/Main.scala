@@ -12,7 +12,7 @@ object CreditCard {
 
 case class Charge(cc: CreditCard, amount: Double) {
   def combine(other: Charge): Charge =
-    if(cc == other.cc)
+    if (cc == other.cc)
       Charge(cc, amount + other.amount)
     else
       throw new Exception("Can't combine charges to different cards")
@@ -26,7 +26,7 @@ class Cafe {
 
   def buyCoffees(cc: CreditCard, n: Int): (List[Coffee], Charge) = {
     val purchases: List[(Coffee, Charge)] = List.fill(n)(buyCoffee(cc))
-    val (coffees, charges) = purchases.unzip
+    val (coffees, charges)                = purchases.unzip
     (coffees, charges.reduce((c1, c2) => c1.combine(c2)))
   }
 
@@ -49,7 +49,7 @@ object Main extends App {
   val (_, charge2) = cafe.buyCoffees(card1, 8)
 
   val (_, charge3) = cafe.buyCoffees(card2, 1)
-  val (_, charge4)= cafe.buyCoffees(card2, 1)
+  val (_, charge4) = cafe.buyCoffees(card2, 1)
   val (_, charge5) = cafe.buyCoffees(card2, 1)
 
   // now let's coalesce the charges to minimize credit card fees

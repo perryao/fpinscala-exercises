@@ -8,7 +8,7 @@ sealed trait Stream[+A] {
   }
 
   def headOptionByFoldRight: Option[A] =
-    foldRight(None:Option[A])((h, _) => Some(h))
+    foldRight(None: Option[A])((h, _) => Some(h))
 
   // susceptible to stackoverflow.
   // TODO: use tail recursion
@@ -25,9 +25,9 @@ sealed trait Stream[+A] {
 
   def takeByUnfold(n: Int): Stream[A] =
     unfold((this, n)) {
-      case (Cons(h, t), 1) => Some((h(), (empty, 0)))
+      case (Cons(h, t), 1)          => Some((h(), (empty, 0)))
       case (Cons(h, t), n) if n > 1 => Some((h(), (t(), n - 1)))
-      case _ => None
+      case _                        => None
     }
 
   @annotation.tailrec
@@ -44,7 +44,7 @@ sealed trait Stream[+A] {
   def takeWhileByUnfold(p: A => Boolean): Stream[A] =
     unfold(this) {
       case Cons(h, t) if p(h()) => Some((h(), t()))
-      case _ => None
+      case _                    => None
     }
 
   def takeWhileByFoldRight(p: A => Boolean): Stream[A] =
@@ -74,9 +74,9 @@ sealed trait Stream[+A] {
     foldRight(empty[B])((a, b) => cons(f(a), b))
 
   def mapByUnfold[B](f: A => B): Stream[B] =
-    unfold(this){ 
-      case Cons(h, t) => Some((f(h()), t())) 
-      case _ => None
+    unfold(this) {
+      case Cons(h, t) => Some((f(h()), t()))
+      case _          => None
     }
 
   def filter(f: A => Boolean): Stream[A] =
@@ -85,7 +85,7 @@ sealed trait Stream[+A] {
   def find(f: A => Boolean): Option[A] =
     filter(f).headOption
 
-  def append[B>:A](a: => Stream[B]): Stream[B] =
+  def append[B >: A](a: => Stream[B]): Stream[B] =
     foldRight(a)((a, b) => cons(a, b))
 
   def flatMap[B](f: A => Stream[B]): Stream[B] =
@@ -94,16 +94,16 @@ sealed trait Stream[+A] {
   def zipWith[B, C](b: Stream[B])(f: (A, B) => C): Stream[C] =
     unfold((this, b)) {
       case (Cons(h1, t1), Cons(h2, t2)) => Some((f(h1(), h2()), (t1(), t2())))
-      case _ => None
+      case _                            => None
     }
 
   def zipAll[B](s2: Stream[B]): Stream[(Option[A], Option[B])] =
     unfold((this, s2)) {
-      case (Empty, Empty) => None
-      case (Cons(h, t), Empty) => Some((Some(h()), None), (t(), empty))
-      case (Empty, Cons(h, t)) => Some((None, Some(h())), (empty, t()))
+      case (Empty, Empty)               => None
+      case (Cons(h, t), Empty)          => Some((Some(h()), None), (t(), empty))
+      case (Empty, Cons(h, t))          => Some((None, Some(h())), (empty, t()))
       case (Cons(h1, t1), Cons(h2, t2)) => Some((Some(h1()), Some(h2())), (t1(), t2()))
-      case _ => None
+      case _                            => None
     }
 
   def startsWith[A](s: Stream[A]): Boolean =
@@ -112,13 +112,13 @@ sealed trait Stream[+A] {
   def tails: Stream[Stream[A]] =
     unfold(this) {
       case Empty => None
-      case s => Some((s, s drop 1))
-    } append(Stream(empty))
+      case s     => Some((s, s drop 1))
+    } append (Stream(empty))
 
   // see: https://github.com/fpinscala/fpinscala/blob/master/answerkey/laziness/16.answer.scala
   def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] =
     foldRight((z, Stream(z)))((a, p0) => {
-      // p0 is passed by-name and used in by-name args in f and cons. 
+      // p0 is passed by-name and used in by-name args in f and cons.
       // So use lazy val to ensure only one evaluation...
       lazy val p1 = p0
       println((a, p1._1, p1._2.toList))
@@ -130,7 +130,7 @@ sealed trait Stream[+A] {
     tails exists (_ startsWith s)
 }
 
-case object Empty extends Stream[Nothing]
+case object Empty                                   extends Stream[Nothing]
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
 
 object Stream {
@@ -148,7 +148,7 @@ object Stream {
 
   def onesByUnfold(): Stream[Int] = unfold(1)(_ => Some(1, 1))
 
-  def from(n: Int): Stream[Int] = cons(n, from(n + 1))
+  def from(n: Int): Stream[Int]         = cons(n, from(n + 1))
   def fromByUnfold(n: Int): Stream[Int] = unfold(n)(n => Some(n, n + 1))
 
   def fibs(): Stream[Int] = {
@@ -157,11 +157,11 @@ object Stream {
   }
 
   // read more on Pattern Matching anonymous functions here: https://www.scala-lang.org/files/archive/spec/2.12/08-pattern-matching.html#pattern-matching-anonymous-functions
-  def fibsByUnfold(): Stream[Int] = unfold((0,1)) {case (f0, f1) => Some(f0, (f1, f0 + f1))}
+  def fibsByUnfold(): Stream[Int] = unfold((0, 1)) { case (f0, f1) => Some(f0, (f1, f0 + f1)) }
 
   def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = f(z) match {
-    case None => empty
-    case Some((a, s)) => cons(a, unfold(s)(f)) 
+    case None         => empty
+    case Some((a, s)) => cons(a, unfold(s)(f))
   }
 
   def empty[A]: Stream[A] = Empty
@@ -182,24 +182,24 @@ object Main extends App {
   println(Stream(1, 2, 3).takeWhile(_ < 3).toList) // List(1,2)
 
   // exercise 5.4
-  println(Stream(1, 2, 3).forAll(_ > 0)) // true
+  println(Stream(1, 2, 3).forAll(_ > 0))            // true
   println(Stream(1, 2, 3).forAllByFoldRight(_ > 0)) // true
-  println(Stream(1, 2, 3).forAll(_ < 2)) // false
+  println(Stream(1, 2, 3).forAll(_ < 2))            // false
   println(Stream(1, 2, 3).forAllByFoldRight(_ < 2)) // false
 
   // exercise 5.5
   println(Stream(1, 2, 3).takeWhileByFoldRight(_ < 3).toList) // List(1,2)
 
   // exercise 5.6
-  println(Stream(1,2,3).headOptionByFoldRight) // Some(1)
-  println(Stream().headOptionByFoldRight) // None
+  println(Stream(1, 2, 3).headOptionByFoldRight) // Some(1)
+  println(Stream().headOptionByFoldRight)        // None
 
   // exercise 5.7
-  println(Stream(1,2,3).map(_ + 1).toList) // List(2,3,4)
-  println(Stream(1,2,3).filter(_ < 3).toList) // List(1,2)
-  println(Stream(1,2,3).append(Stream(3,4,5)).toList) // List(1,2,3,4,5)
+  println(Stream(1, 2, 3).map(_ + 1).toList)                     // List(2,3,4)
+  println(Stream(1, 2, 3).filter(_ < 3).toList)                  // List(1,2)
+  println(Stream(1, 2, 3).append(Stream(3, 4, 5)).toList)        // List(1,2,3,4,5)
   println(Stream(1, 2, 3).flatMap(x => Stream(x, x + 1)).toList) // List(1,2,2,3,3,4)
-  println(Stream(1,2,3,4).map(_ + 10).filter(_ % 2 ==0).toList)
+  println(Stream(1, 2, 3, 4).map(_ + 10).filter(_ % 2 == 0).toList)
 
   // exercise 5.8
   println(Stream.constant(5).take(3).toList) // List(5,5,5)
@@ -216,28 +216,28 @@ object Main extends App {
   println(Stream.unfold(0)(x => Some(x, x + 1)).take(3).toList) // List(0,1,2)
 
   // exercise 5.12
-  println(Stream.fibsByUnfold().take(7).toList) // List(0,1,1,2,3,5,8
-  println(Stream.fromByUnfold(5).take(3).toList) // List(5,6,7)
+  println(Stream.fibsByUnfold().take(7).toList)      // List(0,1,1,2,3,5,8
+  println(Stream.fromByUnfold(5).take(3).toList)     // List(5,6,7)
   println(Stream.constantByUnfold(5).take(3).toList) // List(5,5,5)
-  println(Stream.onesByUnfold().take(3).toList) // List(1,1,1)
+  println(Stream.onesByUnfold().take(3).toList)      // List(1,1,1)
 
   // exercise 5.13
-  println(Stream(1,2,3).mapByUnfold(_ + 1).toList) // List(2,3,4)
-  println(Stream.fibs().takeByUnfold(7).toList) // List(0,1,1,2,3,5,8)
-  println(Stream(1, 2, 3).takeWhileByUnfold(_ < 3).toList) // List(1,2)
-  println(Stream(1,2,3).zipWith(Stream(4,5,6))(_ + _).toList) // List(5,7,9)
-  println(Stream(1,2,3).zipAll(Stream(4,5)).toList) // List((Some(1), Some(4)), (Some(2), Some(5)), (Some(3), None))
-  println(Stream(1,2).zipAll(Stream(4,5,6)).toList) // List((Some(1), Some(4)), (Some(2), Some(5)), (None, Some(6)))
+  println(Stream(1, 2, 3).mapByUnfold(_ + 1).toList)              // List(2,3,4)
+  println(Stream.fibs().takeByUnfold(7).toList)                   // List(0,1,1,2,3,5,8)
+  println(Stream(1, 2, 3).takeWhileByUnfold(_ < 3).toList)        // List(1,2)
+  println(Stream(1, 2, 3).zipWith(Stream(4, 5, 6))(_ + _).toList) // List(5,7,9)
+  println(Stream(1, 2, 3).zipAll(Stream(4, 5)).toList)            // List((Some(1), Some(4)), (Some(2), Some(5)), (Some(3), None))
+  println(Stream(1, 2).zipAll(Stream(4, 5, 6)).toList)            // List((Some(1), Some(4)), (Some(2), Some(5)), (None, Some(6)))
 
   // exercise 5.14
-  println(Stream(1,2).startsWith(Stream(1))) // true
+  println(Stream(1, 2).startsWith(Stream(1))) // true
 
   // exercise 5.15
-  println(Stream(1,2).tails.map(_.toList).toList) // List(List(1,2), List(2), List())
+  println(Stream(1, 2).tails.map(_.toList).toList) // List(List(1,2), List(2), List())
 
   // hasSubsequence
-  println(Stream(1,2,3,4,5,6).hasSubsequence(Stream(2,3))) // true
+  println(Stream(1, 2, 3, 4, 5, 6).hasSubsequence(Stream(2, 3))) // true
 
   // exercise 5.16
-  println(Stream(1,2,3).scanRight(0)(_ + _).toList) // List(6,5,3,0)
+  println(Stream(1, 2, 3).scanRight(0)(_ + _).toList) // List(6,5,3,0)
 }
