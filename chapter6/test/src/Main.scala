@@ -12,9 +12,11 @@ class MainSpec extends FlatSpec with Matchers with TableDrivenPropertyChecks {
   }
 
   trait SimpleRNGFixtures {
+
     val minValueRNG = new RNG {
       def nextInt: (Int, RNG) = (Int.MinValue, SimpleRNG(0))
     }
+
     val rngs = Table(
       ("rng"),
       SimpleRNG(-1),
@@ -38,6 +40,13 @@ class MainSpec extends FlatSpec with Matchers with TableDrivenPropertyChecks {
   "double" should "generate a double between 0 and 1, not including 1" in new SimpleRNGFixtures {
     forAll(rngs) { (rng: RNG) =>
       val (n1, _) = double(rng)
+      assert(n1 >= 0 && n1 < 1)
+    }
+  }
+
+  "doubleByMap" should "generate a double between 0 and 1, not including 1" in new SimpleRNGFixtures {
+    forAll(rngs) { (rng: RNG) =>
+      val (n1, _) = doubleByMap(rng)
       assert(n1 >= 0 && n1 < 1)
     }
   }

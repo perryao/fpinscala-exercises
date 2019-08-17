@@ -5,6 +5,7 @@ trait RNG {
 }
 
 case class SimpleRNG(seed: Long) extends RNG {
+
   def nextInt: (Int, RNG) = {
     val newSeed = (seed * 0X5DEECE66DL + 0XBL) & 0XFFFFFFFFFFFFL
     val nextRNG = SimpleRNG(newSeed)
@@ -14,6 +15,21 @@ case class SimpleRNG(seed: Long) extends RNG {
 }
 
 object SimpleRNG {
+  type Rand[+A] = RNG => (A, RNG)
+  val int: Rand[Int] = _.nextInt
+
+  def unit[A](a: A): Rand[A] =
+    rng => (a, rng)
+
+  def map[A, B](s: Rand[A])(f: A => B): Rand[B] =
+    rng => {
+      val (a, rng2) = s(rng)
+      (f(a), rng2)
+    }
+
+  def nonNegativeEven: Rand[Int] =
+    map(nonNegativeInt)(i => i - i % 2)
+
   def randomPair(rng: RNG): ((Int, Int), RNG) = {
     val (i1, rng2) = rng.nextInt
     val (i2, rng3) = rng2.nextInt
@@ -33,6 +49,12 @@ object SimpleRNG {
     val (i, r) = nonNegativeInt(rng)
     (i / (Int.MaxValue.toDouble + 1), r)
   }
+
+  // exercise 6.5
+  def _double: Rand[Double] =
+    map(nonNegativeInt)(i => i / (Int.MaxValue.toDouble + 1))
+
+  def doubleByMap(rng: RNG): (Double, RNG) = _double(rng)
 
   def intDouble(rng: RNG): ((Int, Double), RNG) = {
     val (i, r1) = rng.nextInt
