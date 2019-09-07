@@ -87,4 +87,12 @@ class MainSpec extends FlatSpec with Matchers with TableDrivenPropertyChecks {
       println(randomInts)
     }
   }
+
+  "map2" should "map Rand[A] and Rand[B] to Rand[C]" in {
+    val ra              = unit(1)
+    val rb              = unit(1.0)
+    val rc              = map2(ra, rb)((_, _))
+    val ((c1, c2), rng) = rc(SimpleRNG(1))
+    assert(c1 == 1 && c2 == 1.0)
+  }
 }

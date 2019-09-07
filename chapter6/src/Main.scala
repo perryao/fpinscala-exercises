@@ -27,6 +27,17 @@ object SimpleRNG {
       (f(a), rng2)
     }
 
+  // exercise 6.6
+  def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+    rng => {
+      val (a, rngA) = ra(rng)
+      val (b, rngB) = rb(rngA)
+      (f(a, b), rngB)
+    }
+
+  def both[A, B](ra: Rand[A], rb: Rand[B]): Rand[(A, B)] =
+    map2(ra, rb)((_, _))
+
   def nonNegativeEven: Rand[Int] =
     map(nonNegativeInt)(i => i - i % 2)
 
@@ -62,10 +73,16 @@ object SimpleRNG {
     ((i, d), r2)
   }
 
+  val randIntDouble: Rand[(Int, Double)] =
+    both(int, double)
+
   def doubleInt(rng: RNG): ((Double, Int), RNG) = {
     val ((i, d), r) = intDouble(rng)
     ((d, i), r)
   }
+
+  val randDoubleInt: Rand[(Double, Int)] =
+    both(double, int)
 
   def double3(rng: RNG): ((Double, Double, Double), RNG) = {
     val (d1, r1) = double(rng)
