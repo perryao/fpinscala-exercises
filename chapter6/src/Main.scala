@@ -35,6 +35,23 @@ object SimpleRNG {
       (f(a, b), rngB)
     }
 
+  // exercise 6.7
+  // from answerkey: https://github.com/fpinscala/fpinscala/blob/master/answerkey/state/07.answer.scala
+  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =
+    fs.foldRight(unit(List[A]()))((f, acc) => map2(f, acc)(_ :: _))
+
+  // original solution by me
+  def mysequence[A](fs: List[Rand[A]]): Rand[List[A]] =
+    rng => {
+      // elements in fs are functions rng => (A, RNG)
+      // return (List[A], RNG)
+      fs.foldLeft((List[A](), rng)) { (acc, rand) =>
+        val (xs, r1) = acc
+        val (x, r2)  = rand(r1)
+        (xs :+ x, r2)
+      }
+    }
+
   def both[A, B](ra: Rand[A], rb: Rand[B]): Rand[(A, B)] =
     map2(ra, rb)((_, _))
 

@@ -95,4 +95,10 @@ class MainSpec extends FlatSpec with Matchers with TableDrivenPropertyChecks {
     val ((c1, c2), rng) = rc(SimpleRNG(1))
     assert(c1 == 1 && c2 == 1.0)
   }
+
+  "sequence" should "combine a list of transitions into a single transition" in {
+    val r = SimpleRNG(1)
+    val l = sequence(List(unit(1), unit(2), unit(3)))(r)._1
+    assert(l == List(1, 2, 3))
+  }
 }
