@@ -1,4 +1,4 @@
-import $ivy.`com.lihaoyi::mill-contrib-bloop:0.5.0`
+import $ivy.`com.lihaoyi::mill-contrib-bloop:0.5.1`
 import mill._, scalalib._, scalafmt._
 
 trait BaseModule extends ScalaModule with ScalafmtModule {

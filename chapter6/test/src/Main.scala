@@ -101,4 +101,20 @@ class MainSpec extends FlatSpec with Matchers with TableDrivenPropertyChecks {
     val l = sequence(List(unit(1), unit(2), unit(3)))(r)._1
     assert(l == List(1, 2, 3))
   }
+
+  // exercise 6.7
+  "flatMap" should "map Rand[A] to Rand[B]" in {
+    val rng             = SimpleRNG(1)
+    val a: Rand[Int]    = unit(1)
+    val b: Rand[String] = flatMap(a)(a => unit(a.toString()))
+    val (aValue, r1)    = a(rng)
+    val (bValue, r2)    = b(r1)
+    assert(bValue == "1")
+  }
+
+  // exercise 6.7
+  "nonNegativeLessThan" should "generate ints less than n" in {
+    val (a, rng) = nonNegativeLessThan(4)(SimpleRNG(4))
+    assert(a < 4)
+  }
 }
